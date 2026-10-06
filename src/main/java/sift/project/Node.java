@@ -89,6 +89,11 @@ public final class Node {
         return DEPENDENCIES.matcher(read(root)).find();
     }
 
+    /** True if package.json mentions {@code name} as a key, e.g. a dependency called "next". */
+    public static boolean declares(Path root, String name) {
+        return Pattern.compile("\"" + Pattern.quote(name) + "\"\\s*:").matcher(read(root)).find();
+    }
+
     private static String read(Path root) {
         try {
             return Files.readString(root.resolve("package.json"));

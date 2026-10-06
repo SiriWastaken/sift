@@ -34,6 +34,8 @@
   </dependencies>
 
   <build>
+    <!-- A version-free file name lets the launcher scripts find the jar. -->
+    <finalName>sift</finalName>
     <plugins>
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>

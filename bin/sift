@@ -1,0 +1,16 @@
+#!/bin/sh
+# Launcher: runs the jar built by `mvn package`, wherever this script is
+# invoked from, including through a symlink on the user's PATH.
+src=$0
+while [ -h "$src" ]; do
+    dir=$(cd -P "$(dirname "$src")" && pwd)
+    src=$(readlink "$src")
+    case $src in /*) ;; *) src=$dir/$src ;; esac
+done
+dir=$(cd -P "$(dirname "$src")" && pwd)
+jar=$dir/../target/sift.jar
+if [ ! -f "$jar" ]; then
+    echo "sift: $jar not found; run 'mvn package' first" >&2
+    exit 2
+fi
+exec java -jar "$jar" "$@"

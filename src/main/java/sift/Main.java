@@ -11,6 +11,7 @@ import java.nio.file.Path;
 
 import java.util.Arrays;
 
+import sift.cli.CheckCommand;
 import sift.cli.DiffCommand;
 import sift.cli.InspectCommand;
 
@@ -29,6 +30,7 @@ public final class Main {
 
             Commands:
               inspect    Describe the project in the current directory
+              check      Build and test it; report whether it looks healthy
               diff       Summarize uncommitted changes
                          (sift diff [--staged] [<revision>])
 
@@ -68,6 +70,9 @@ public final class Main {
             }
             case "inspect" -> {
                 return InspectCommand.run(cwd, out);
+            }
+            case "check" -> {
+                return CheckCommand.run(cwd, out);
             }
             case "diff" -> {
                 return DiffCommand.run(Arrays.asList(args).subList(1, args.length), cwd, out, err);

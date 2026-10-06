@@ -60,14 +60,33 @@ class MainTest {
         Files.createFile(dir.resolve("pom.xml"));
         assertEquals(Main.OK, run("inspect"));
         String o = out();
-        assertTrue(o.contains("project   " + dir.getFileName()), o);
-        assertTrue(o.contains("language  Java"), o);
-        assertTrue(o.contains("build     Maven"), o);
+        assertTrue(o.matches("(?s).*\\nproject\\s+" + java.util.regex.Pattern.quote(dir.getFileName().toString()) + "\\n.*"), o);
+        assertTrue(o.matches("(?s).*\\nlanguage\\s+Java\\n.*"), o);
+        assertTrue(o.matches("(?s).*\\nbuild\\s+Maven\\n.*"), o);
     }
 
     @Test void inspectSaysUnknownRatherThanGuessing() {
         run("inspect");
-        assertTrue(out().contains("language  unknown"));
-        assertTrue(out().contains("build     unknown"));
+        assertTrue(out().matches("(?s).*\\nlanguage\\s+unknown\\n.*"), out());
+        assertTrue(out().matches("(?s).*\\nframework\\s+unknown\\n.*"), out());
+        assertTrue(out().matches("(?s).*\\nbuild\\s+unknown\\n.*"), out());
+        assertTrue(out().matches("(?s).*\\ntests\\s+unknown\\n.*"), out());
+    }
+
+    @Test void inspectReportsStackSizeAndSecondaryLanguages() throws IOException {
+        Files.writeString(dir.resolve("package.json"),
+                "{\"dependencies\": {\"next\": \"14\", \"react\": \"18\"}, \"devDependencies\": {\"vitest\": \"1\"}}");
+        Files.writeString(dir.resolve("pnpm-lock.yaml"), "");
+        Files.writeString(dir.resolve("tsconfig.json"), "{}");
+        Files.writeString(dir.resolve("a.ts"), "export {}");
+        Files.writeString(dir.resolve("tool.py"), "pass");
+        assertEquals(Main.OK, run("inspect"));
+        String o = out();
+        assertTrue(o.matches("(?s).*\\nlanguage\\s+TypeScript\\n.*"), o);
+        assertTrue(o.matches("(?s).*\\nalso\\s+Python\\n.*"), o);
+        assertTrue(o.matches("(?s).*\\nframework\\s+Next\\.js\\n.*"), o);
+        assertTrue(o.matches("(?s).*\\npackage\\s+pnpm\\n.*"), o);
+        assertTrue(o.matches("(?s).*\\ntests\\s+vitest\\n.*"), o);
+        assertTrue(o.matches("(?s).*\\nfiles\\s+5 \\(.*\\)\\n.*"), o);
     }
 }

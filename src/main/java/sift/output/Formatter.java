@@ -53,4 +53,19 @@ public final class Formatter {
     public static String count(int n, String noun) {
         return n + " " + noun + (n == 1 ? "" : "s");
     }
+
+    /** Decimal units, as file managers show them: "812 B", "12.4 MB". Locale-independent. */
+    public static String size(long bytes) {
+        if (bytes < 1000) { // below 1 kB there is nothing to round
+            return bytes + " B";
+        }
+        String[] units = {"kB", "MB", "GB", "TB"};
+        double v = bytes;
+        int i = -1;
+        while (v >= 999.95 && i < units.length - 1) {
+            v /= 1000;
+            i++;
+        }
+        return String.format(java.util.Locale.ROOT, "%.1f %s", v, units[i]);
+    }
 }

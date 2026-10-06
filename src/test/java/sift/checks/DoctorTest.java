@@ -152,4 +152,37 @@ class DoctorTest {
         assertEquals(Status.FAIL, r.status());
         assertTrue(r.detail().contains("1 file"), r.detail());
     }
+
+    @Test void upstreamDivergenceAndLagAreReported() throws Exception {
+        Path remote = dir.resolve("remote.git");
+        Path mine = dir.resolve("mine");
+        Path other = dir.resolve("other");
+        java.nio.file.Files.createDirectories(remote);
+        git(remote, "init", "-q", "--bare", "-b", "main");
+
+        java.nio.file.Files.createDirectories(mine);
+        init(mine);
+        write(mine, "a.txt", "1\n");
+        commitAll(mine, "first");
+        git(mine, "remote", "add", "origin", remote.toString());
+        git(mine, "push", "-q", "-u", "origin", "main");
+
+        git(dir, "clone", "-q", remote.toString(), "other");
+        git(other, "config", "user.email", "t@example.com");
+        git(other, "config", "user.name", "T");
+        write(other, "b.txt", "2\n");
+        commitAll(other, "second");
+        git(other, "push", "-q", "origin", "main");
+        git(mine, "fetch", "-q");
+
+        String behind = Doctor.run(ProjectDetector.detect(mine)).stream()
+                .filter(r -> r.name().equals("Git state")).findFirst().orElseThrow().detail();
+        assertTrue(behind.contains("1 commit behind upstream"), behind);
+
+        write(mine, "c.txt", "3\n");
+        commitAll(mine, "local only");
+        String diverged = Doctor.run(ProjectDetector.detect(mine)).stream()
+                .filter(r -> r.name().equals("Git state")).findFirst().orElseThrow().detail();
+        assertTrue(diverged.contains("diverged from upstream: 1 ahead, 1 behind"), diverged);
+    }
 }

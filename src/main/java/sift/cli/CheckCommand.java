@@ -58,6 +58,7 @@ public final class CheckCommand {
             emit(results, out, r);
         }
 
+        out.println();
         long failed = results.stream().filter(r -> r.status() == Status.FAIL).count();
         long warned = results.stream().filter(r -> r.status() == Status.WARN).count();
         if (failed > 0) {

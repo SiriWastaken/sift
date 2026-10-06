@@ -100,8 +100,11 @@ public final class Doctor {
         if (s.branch().equals("(detached)")) {
             problems.add("HEAD is detached; commits made now belong to no branch");
         }
-        if (s.behind() > 0) {
-            problems.add(s.behind() + " commit(s) behind upstream");
+        if (s.behind() > 0 && s.ahead() > 0) {
+            // Neither a plain pull nor a plain push will work now.
+            problems.add("diverged from upstream: " + s.ahead() + " ahead, " + s.behind() + " behind");
+        } else if (s.behind() > 0) {
+            problems.add(s.behind() + (s.behind() == 1 ? " commit" : " commits") + " behind upstream");
         }
         if (s.changed() > 0 || s.untracked() > 0) {
             problems.add(s.describe());

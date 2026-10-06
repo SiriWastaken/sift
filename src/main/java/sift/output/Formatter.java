@@ -23,4 +23,9 @@ public final class Formatter {
         }
         return sb.toString();
     }
+
+    /** "1 file", "3 files". */
+    public static String count(int n, String noun) {
+        return n + " " + noun + (n == 1 ? "" : "s");
+    }
 }

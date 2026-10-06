@@ -9,6 +9,9 @@ import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 
+import java.util.Arrays;
+
+import sift.cli.DiffCommand;
 import sift.cli.InspectCommand;
 
 /** Entry point: parses the command line and maps it to an exit code. */
@@ -26,6 +29,8 @@ public final class Main {
 
             Commands:
               inspect    Describe the project in the current directory
+              diff       Summarize uncommitted changes
+                         (sift diff [--staged] [<revision>])
 
             Options:
               --help     Show this help
@@ -63,6 +68,9 @@ public final class Main {
             }
             case "inspect" -> {
                 return InspectCommand.run(cwd, out);
+            }
+            case "diff" -> {
+                return DiffCommand.run(Arrays.asList(args).subList(1, args.length), cwd, out, err);
             }
             default -> {
                 err.println("Unknown command: " + args[0]);
